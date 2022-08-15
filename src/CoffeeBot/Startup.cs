@@ -1,9 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-//
-// Generated with Bot Builder V4 SDK Template for Visual Studio EmptyBot v4.15.2
-
-using CoffeeBot.Dialogs;
+﻿using CoffeeBot.Dialogs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
@@ -12,6 +7,10 @@ using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RepoDb;
+using RepoDb.DbHelpers;
+using RepoDb.DbSettings;
+using RepoDb.StatementBuilders;
 
 namespace CoffeeBot
 {
@@ -28,6 +27,15 @@ namespace CoffeeBot
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient().AddControllers().AddNewtonsoftJson();
+
+            var dbSetting = new SqlServerDbSetting();
+
+            DbSettingMapper
+                .Add<System.Data.SqlClient.SqlConnection>(dbSetting, true);
+            DbHelperMapper
+                .Add<System.Data.SqlClient.SqlConnection>(new SqlServerDbHelper(), true);
+            StatementBuilderMapper
+                .Add<System.Data.SqlClient.SqlConnection>(new SqlServerStatementBuilder(dbSetting), true);
 
 
             services.AddSingleton<RootDialog>();
@@ -58,6 +66,8 @@ namespace CoffeeBot
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            RepoDb.SqlServerBootstrap.Initialize();
 
             app.UseDefaultFiles()
                 .UseStaticFiles()
